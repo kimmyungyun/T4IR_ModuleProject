@@ -1,10 +1,144 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="utf-8">
+    <title>다음 지도 API</title>
+    <script src="//developers.kakao.com/sdk/js/kakao.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <!-- services와 clusterer, drawing 라이브러리 불러오기 -->
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey={{app_key}}&libraries=services,clusterer,drawing"></script>
 </head>
 <body>
-    Main
+
+<script type='text/javascript'>
+    //<![CDATA[
+    // 사용할 앱의 JavaScript 키를 설정해 주세요.
+    Kakao.init("{{app_key}}");
+    //]]>
+</script>
+<div class="container">
+    <div class="" row>
+        <div class=".col-12 .col-sm-12 .col-md-12 .col-lg-12 .col-xl-12">
+            <div id="map" style="width:max-width;height:700px;"></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey={{app_key}}"></script>
+<script>
+    var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+        mapOption = {
+            center: new kakao.maps.LatLng(37.56650, 126.98018), // 지도의 중심좌표
+            level: 3, // 지도의 확대 레벨
+            mapTypeId: kakao.maps.MapTypeId.ROADMAP // 지도종류
+        };
+
+    // 지도를 생성한다
+    var map = new kakao.maps.Map(mapContainer, mapOption);
+
+     // 마커 클러스터러를 생성합니다
+    var clusterer = new kakao.maps.MarkerClusterer({
+        map: map, // 마커들을 클러스터로 관리하고 표시할 지도 객체
+        averageCenter: true, // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
+        minLevel: 10 // 클러스터 할 최소 지도 레벨
+    });
+    var infowindow = null;
+    var openSchool = new Array();
+    var closeSchool = new Array();
+</script>
+
+<form id="mform">
+    <input name="option" type="radio" name="chk_info" value="폐교한 학교">폐교한 학교
+    <input name="option" type="radio" name="chk_info" value="개교한 학교" checked="checked">개교한 학교
+    <input name="option" type="radio" name="chk_info" value="웹디자인">웹디자인
+</form>
+<script type="text/javascript">
+    window.onload = function () {
+        //1. radio 버튼 개별적으로 이벤트 체크
+        var mform = document.getElementById('mform');
+        for (var i = 0; i < mform.option.length; i++) {
+            mform.option[i].onclick = function () {
+                if(this.value == "폐교한 학교")
+                {
+                    clusterer.clear();
+                    clusterer.addMarkers(closeSchool);
+                }
+                else if(this.value == "개교한 학교")
+                {
+                    clusterer.clear();
+                    clusterer.addMarkers(openSchool);
+                }
+
+            };
+        }
+    };
+
+</script>
+
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<script>
+     //폐교 데이터와 개교 데이터 나누기
+    //폐교한 학교 마커 넣기
+
+    {% for loc in unique_location %}
+    {% if loc[0] == 1 %}
+        var marker= new kakao.maps.Marker({
+            map: map,
+            position: new kakao.maps.LatLng({{loc[1]}}, {{ loc[2]}})
+        });
+
+        // 마커에 클릭 이벤트를 등록한다 (우클릭 : rightclick)
+        kakao.maps.event.addListener(marker, 'click', function() {
+            if(infowindow != null){
+                infowindow.close();
+            }
+            infowindow = new kakao.maps.InfoWindow({
+                map: map,
+                position: new kakao.maps.LatLng({{loc[1]}}, {{ loc[2]}}),
+                content: '학교{{loop.index0}}'
+            });
+        });
+        closeSchool.push(marker)
+    {% elif loc[0] == 0%}
+    var marker= new kakao.maps.Marker({
+            map: map,
+            position: new kakao.maps.LatLng({{loc[1]}}, {{ loc[2]}})
+        });
+
+        // 마커에 클릭 이벤트를 등록한다 (우클릭 : rightclick)
+        kakao.maps.event.addListener(marker, 'click', function() {
+            if(infowindow != null){
+                infowindow.close();
+            }
+            infowindow = new kakao.maps.InfoWindow({
+                map: map,
+                position: new kakao.maps.LatLng({{loc[1]}}, {{ loc[2]}}),
+                content: '학교{{loop.index0}}'
+            });
+        });
+        openSchool.push(marker)
+    {% endif %}
+    {%endfor%}
+
+    //mouse click
+    kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+    var latlng = mouseEvent.latLng;
+    alert('click! ' + latlng.toString());
+    var infowindow = new kakao.maps.InfoWindow({
+    map: map,
+    position: new kakao.maps.LatLng(latlng),
+    content: latlng.toString()
+});
+});
+</script>
 </body>
 </html>
