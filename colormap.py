@@ -15,6 +15,8 @@ with open("sido.json", encoding="UTF-8") as f:
     for loc in Loc:
 
         loc_name = loc['properties']['CTP_KOR_NM']
+        if loc_name == "경기도":
+            break
         coordinates = loc['geometry']['coordinates'][0]
         result_coords = []
         cnt2 = 0
@@ -32,7 +34,7 @@ with open("sido.json", encoding="UTF-8") as f:
         cnt = cnt + 1
         print("DDD")
 
-    with open("student_file.json", "w") as json_file:
+    with open("re_sigun.json", "w") as json_file:
         json.dump(q, json_file)
 
 print("QQ")

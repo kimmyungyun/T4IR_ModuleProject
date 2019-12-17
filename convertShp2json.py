@@ -6,7 +6,7 @@ import pandas as pd
 proj_UTMK = Proj(init='epsg:5178')
 proj_WGS84 = Proj(init='epsg:4326')
 
-with open("sigun.json", encoding="UTF-8") as f:
+with open("re_sigun.json", encoding="UTF-8") as f:
     q = json.load(f)
 
     Loc = q["features"]
@@ -32,7 +32,7 @@ with open("sigun.json", encoding="UTF-8") as f:
         cnt = cnt + 1
         print("DDD")
 
-    with open("student_file.json", "w") as json_file:
+    with open("re_sigun.json", "w") as json_file:
         json.dump(q, json_file)
 
 print("QQ")

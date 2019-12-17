@@ -45,12 +45,14 @@
     var infowindow = null;
     var openSchool = new Array();
     var closeSchool = new Array();
+
 </script>
 
 <form id="mform">
-    <input name="option" type="radio" name="chk_info" value="폐교한 학교">폐교한 학교
-    <input name="option" type="radio" name="chk_info" value="개교한 학교" checked="checked">개교한 학교
-    <input name="option" type="radio" name="chk_info" value="웹디자인">웹디자인
+    <input name="option" type="radio" name="chk_info" value="기본 모드" checked="checked">기본 모드
+    <input name="option" type="radio" name="chk_info" value="폐교한 학교" >폐교한 학교
+    <input name="option" type="radio" name="chk_info" value="개교한 학교" >개교한 학교
+    <input name="option" type="radio" name="chk_info" value="비율 구하기" >비율 구하기
 </form>
 <script type="text/javascript">
     window.onload = function () {
@@ -58,7 +60,11 @@
         var mform = document.getElementById('mform');
         for (var i = 0; i < mform.option.length; i++) {
             mform.option[i].onclick = function () {
-                if(this.value == "폐교한 학교")
+                if(this.value == "기본 모드")
+                {
+                    clusterer.clear();
+                }
+                else if(this.value == "폐교한 학교")
                 {
                     clusterer.clear();
                     clusterer.addMarkers(closeSchool);
@@ -68,31 +74,65 @@
                     clusterer.clear();
                     clusterer.addMarkers(openSchool);
                 }
+                else if(this.value == "비율 구하기")
+                {
 
+                    // clusterer.clear();
+                    // clusterer.removeMarker(openSchool);
+                    // clusterer.removeMarker(closeSchool);
+                    // // var polygon = new kakao.maps.Polygon({
+                    // //             map : map, // 다각형을 표시할 지도 객체
+                    // //             path : [ // 다각형을 구성하는 좌표 배열
+                    // //                 new kakao.maps.LatLng(37.56782, 126.97865),
+                    // //                 new kakao.maps.LatLng(37.56782, 126.97665),
+                    // //                 new kakao.maps.LatLng(37.56682, 126.97665)
+                    // //             ],
+                    // //             fillColor: '#FF0000', // 채움 색
+                    // //             fillOpacity: 0.5, // 채움 불투명도
+                    // //             strokeWeight: 3, // 선의 두께
+                    // //             strokeColor: '#FF0000', // 선 색
+                    // //             strokeOpacity: 0.9, // 선 투명도
+                    // //             strokeStyle: 'solid' // 선 스타일
+                    // //         });
+                    // // polygon.setMap(map)
+                    // console.log("QQQ")
+                    // // clusterer.clear()
+                    // var point_list = new Array();
+                    //
+                    // {% for loc in json_data[0]['geometry']['coordinates'][0] %}
+                    //     point_list.push( new kakao.maps.LatLng({{loc[0]}}, {{loc[1]}}));
+                    //     console.log(point_list[{{loop.index0}}])
+                    // {% endfor %}
+                    // //
+                    // // 지도에 다각형을 표시한다
+                    // var polygon = new kakao.maps.Polygon({
+                    //     map : map, // 다각형을 표시할 지도 객체
+                    //     path : point_list,
+                    //     fillColor: '#FF0000', // 채움 색
+                    //     fillOpacity: 0.5, // 채움 불투명도
+                    //     strokeWeight: 3, // 선의 두께
+                    //     strokeColor: '#FF0000', // 선 색
+                    //     strokeOpacity: 0.9, // 선 투명도
+                    //     strokeStyle: 'solid' // 선 스타일
+                    // });
+                    // // polygon.setMap(map); // 지도에 올린다.
+                }
             };
         }
     };
 
 </script>
 
-<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-        crossorigin="anonymous"></script>
+
 
 <script>
      //폐교 데이터와 개교 데이터 나누기
     //폐교한 학교 마커 넣기
-
     {% for loc in unique_location %}
     {% if loc[0] == 1 %}
         var marker= new kakao.maps.Marker({
             map: map,
+            opacity :0.5,
             position: new kakao.maps.LatLng({{loc[1]}}, {{ loc[2]}})
         });
 
@@ -131,14 +171,68 @@
 
     //mouse click
     kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
-    var latlng = mouseEvent.latLng;
-    alert('click! ' + latlng.toString());
-    var infowindow = new kakao.maps.InfoWindow({
-    map: map,
-    position: new kakao.maps.LatLng(latlng),
-    content: latlng.toString()
-});
-});
+        var latlng = mouseEvent.latLng;
+        if(infowindow!= null)
+            infowindow.close();
+
+        check_close = test1(latlng);
+        console.log("check_close = ",check_close)
+        console.log("type = ", typeof(check_close))
+        if(check_close){
+            infowindow = new kakao.maps.InfoWindow({
+                map: map,
+                position: new kakao.maps.LatLng(latlng.getLat(), latlng.getLng()),
+
+                content: "개교"
+            });
+        }
+        else{
+            infowindow = new kakao.maps.InfoWindow({
+                map: map,
+                position: new kakao.maps.LatLng(latlng.getLat(), latlng.getLng()),
+
+                content: "폐교"
+            });
+        }
+    });
+
+     function test1(latlng) {
+         result_value = false;
+        console.log("dddd")
+          $.ajax({
+            type : 'POST',
+            url : '/predict',
+            data : {
+                lat: latlng.getLat(),
+                lng: latlng.getLng()
+            },
+              async: false,
+            dataType : 'json',
+            success : function(result){
+                    console.log("ajax 안 result: ", result)
+                    result_value = result.qq;
+                    console.log(result.qq);
+
+            },
+            error : function(xtr,status,error){
+                    alert("확인할 수 없습니다.");
+            }});
+        return result_value;
+     }
+
 </script>
+
+
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" type="text/javascript"></script>
+
 </body>
 </html>
