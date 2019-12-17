@@ -31,8 +31,8 @@ Jet_colormap = [[0, 0, 191],
 
 restapi = config('KAKAO_REEST_API')
 jsapi = config('KAKAO_JAVASCRIPT_API')
-# with open("re_sigun.json", encoding="UTF-8") as f:
-#     Loc = json.load(f)
+with open("save_sido.json", encoding="UTF-8") as f:
+    Loc = json.load(f)
 
 with open("pca.pkl", 'rb') as rf:
     model = pickle.load(rf)
@@ -61,7 +61,7 @@ def predict(x, y):
 def hello():
     unique_location = pd.read_csv("unique_location.csv", encoding="UTF-8").values.tolist()
     # print(Loc["features"][0]["geometry"])
-    return render_template("index.html", app_key=jsapi, unique_location = unique_location, location_size = len(unique_location), colormaps = Jet_colormap, predict=predict)
+    return render_template("index.html", app_key=jsapi, unique_location = unique_location, location_size = len(unique_location), colormaps = Jet_colormap, predict=predict, json_data = Loc["geometries"])
 
 @app.route('/predict',methods=["POST"])
 def predic():

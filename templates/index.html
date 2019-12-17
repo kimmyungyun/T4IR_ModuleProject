@@ -53,6 +53,8 @@
 </div>
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey={{app_key}}"></script>
 <script>
+
+
     var mapContainer = document.getElementById('map'), // 지도를 표시할 div
         mapOption = {
             center: new kakao.maps.LatLng(37.56650, 126.98018), // 지도의 중심좌표
@@ -70,19 +72,23 @@
         minLevel: 10 // 클러스터 할 최소 지도 레벨
     });
     var infowindow = null;
-    var openSchool = new Array();
-    var closeSchool = new Array();
+    var openSchool = [];
+    var closeSchool = [];
 
+    var polygonList = [];
+    var polygonLength = 0;
 </script>
 
 <!-- 라디오 버튼 글씨크기 변경 -->
 <form id="mform">
     <div id='test' style="padding-top: 10px;">
-    <input class="va_m radio" name="option" type="radio" name="chk_info" value="기본 모드"><label style="font-size: 20px;"><strong>기본 모드</strong></label> 
+    <input class="va_m radio" name="option" type="radio" name="chk_info" value="기본 모드" checked="checked"><label style="font-size: 20px;"><strong>기본 모드</strong></label>
     <input class="va_m radio" name="option" type="radio" name="chk_info" value="폐교한 학교"><label style="font-size: 20px;"><strong>폐교한 학교</strong></label> 
-    <input class="va_m radio" name="option" type="radio" name="chk_info" value="개교한 학교" checked="checked"><label style="font-size: 20px;"><strong>개교한 학교</strong></label> 
+    <input class="va_m radio" name="option" type="radio" name="chk_info" value="개교한 학교"><label style="font-size: 20px;"><strong>개교한 학교</strong></label>
     <input class="va_m radio" name="option" type="radio" ncame="chk_info" value="비율 구하기"><label style="font-size: 20px;"><strong>비율 구하기</strong></label> 
-</div>
+    <input class="va_m radio" name="option" type="radio" ncame="chk_info" value="비율 지우기"><label style="font-size: 20px;"><strong>비율 지우기</strong></label>
+
+    </div>
 </form>
 
 <script type="text/javascript">
@@ -94,6 +100,7 @@
                 if(this.value == "기본 모드")
                 {
                     clusterer.clear();
+                    clusterer.redraw();
                 }
                 else if(this.value == "폐교한 학교")
                 {
@@ -107,47 +114,57 @@
                 }
                 else if(this.value == "비율 구하기")
                 {
-
-                    // clusterer.clear();
-                    // clusterer.removeMarker(openSchool);
-                    // clusterer.removeMarker(closeSchool);
-                    // // var polygon = new kakao.maps.Polygon({
-                    // //             map : map, // 다각형을 표시할 지도 객체
-                    // //             path : [ // 다각형을 구성하는 좌표 배열
-                    // //                 new kakao.maps.LatLng(37.56782, 126.97865),
-                    // //                 new kakao.maps.LatLng(37.56782, 126.97665),
-                    // //                 new kakao.maps.LatLng(37.56682, 126.97665)
-                    // //             ],
-                    // //             fillColor: '#FF0000', // 채움 색
-                    // //             fillOpacity: 0.5, // 채움 불투명도
-                    // //             strokeWeight: 3, // 선의 두께
-                    // //             strokeColor: '#FF0000', // 선 색
-                    // //             strokeOpacity: 0.9, // 선 투명도
-                    // //             strokeStyle: 'solid' // 선 스타일
-                    // //         });
-                    // // polygon.setMap(map)
-                    // console.log("QQQ")
-                    // // clusterer.clear()
-                    // var point_list = new Array();
-                    //{#
-                    // {% for loc in json_data[0]['geometry']['coordinates'][0] %}
-                    //     point_list.push( new kakao.maps.LatLng({{loc[0]}}, {{loc[1]}}));
-                    //     console.log(point_list[{{loop.index0}}])
-                    // {% endfor %}
-                //#}
-                    // //
-                    // // 지도에 다각형을 표시한다
-                    // var polygon = new kakao.maps.Polygon({
-                    //     map : map, // 다각형을 표시할 지도 객체
-                    //     path : point_list,
-                    //     fillColor: '#FF0000', // 채움 색
-                    //     fillOpacity: 0.5, // 채움 불투명도
-                    //     strokeWeight: 3, // 선의 두께
-                    //     strokeColor: '#FF0000', // 선 색
-                    //     strokeOpacity: 0.9, // 선 투명도
-                    //     strokeStyle: 'solid' // 선 스타일
-                    // });
-                    // // polygon.setMap(map); // 지도에 올린다.
+                    {% for geo in json_data%}
+                        {% if geo['type'] =='Polygon' %}
+                            {% for i in geo['coordinates'] %}
+                                var path = [];
+                                {% for j in i%}
+                                    path.push(new kakao.maps.LatLng({{j[1]}}, {{j[0]}}));
+                                {% endfor %}
+                                 var polygon = new kakao.maps.Polygon({
+                                    map : map, // 다각형을 표시할 지도 객체
+                                    path : path,
+                                    fillColor: '#FF0000', // 채움 색
+                                    fillOpacity: 0.5, // 채움 불투명도
+                                    strokeWeight: 3, // 선의 두께
+                                    strokeColor: '#FF0000', // 선 색
+                                    strokeOpacity: 0.9, // 선 투명도
+                                    strokeStyle: 'solid' // 선 스타일
+                                });
+                                polygon.setMap(map); // 지도에 올린다.
+                                polygonList.push(polygon);
+                                polygonLength++;
+                            {% endfor %}
+                        {% elif geo['type'] =='MultiPolygon' %}
+                            {% for i in geo['coordinates']%}
+                                {% for j in i%}
+                                    var path = [];
+                                    {% for k in j%}
+                                        path.push(new kakao.maps.LatLng({{k[1]}}, {{k[0]}}));
+                                    {% endfor %}
+                                     var polygon = new kakao.maps.Polygon({
+                                        map : map, // 다각형을 표시할 지도 객체
+                                        path : path,
+                                        fillColor: '#FF0000', // 채움 색
+                                        fillOpacity: 0.5, // 채움 불투명도
+                                        strokeWeight: 3, // 선의 두께
+                                        strokeColor: '#FF0000', // 선 색
+                                        strokeOpacity: 0.9, // 선 투명도
+                                        strokeStyle: 'solid' // 선 스타일
+                                    });
+                                    polygon.setMap(map); // 지도에 올린다.
+                                    polygonList.push(polygon);
+                                    polygonLength++;
+                                {% endfor %}
+                            {% endfor %}
+                        {%endif%}
+                    {%endfor%}
+                }
+                else if(this.value == "비율 지우기"){
+                    for(var i=0; i<polygonList.length; i++ )
+                    {
+                        polygonList[i].setMap(null);
+                    }
                 }
             };
         }
@@ -200,7 +217,8 @@
         openSchool.push(marker)
     {% endif %}
     {%endfor%}
-
+     clusterer.clear();
+     clusterer.redraw();
     //mouse click
     kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
         var latlng = mouseEvent.latLng;
@@ -208,13 +226,10 @@
             infowindow.close();
 
         check_close = test1(latlng);
-        console.log("check_close = ",check_close)
-        console.log("type = ", typeof(check_close))
         if(check_close){
             infowindow = new kakao.maps.InfoWindow({
                 map: map,
                 position: new kakao.maps.LatLng(latlng.getLat(), latlng.getLng()),
-
                 content: "개교"
             });
         }
@@ -222,7 +237,6 @@
             infowindow = new kakao.maps.InfoWindow({
                 map: map,
                 position: new kakao.maps.LatLng(latlng.getLat(), latlng.getLng()),
-
                 content: "폐교"
             });
         }
