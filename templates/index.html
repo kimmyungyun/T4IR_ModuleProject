@@ -4,10 +4,31 @@
     <meta charset="utf-8">
     <title>다음 지도 API</title>
     <script src="//developers.kakao.com/sdk/js/kakao.min.js"></script>
+    <!-- 폰트 어썸 추가 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <!-- services와 clusterer, drawing 라이브러리 불러오기 -->
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey={{app_key}}&libraries=services,clusterer,drawing"></script>
+<!-- 스타일 태그 추가 -->
+<style>
+    #test {
+     width: 100%;
+     height: 50px;
+     text-align: center;
+     color: white;
+     }
+    .va_m radio {
+     display: inline-block;
+     text-align: center;
+     margin: 0px 2px 2px 0px;
+     }
+    
+    body {
+        background-color: black;
+    }
+    
+    </style>
 </head>
 <body>
 
@@ -18,9 +39,15 @@
     //]]>
 </script>
 <div class="container">
+
+    <!-- 헤더 추가 -->
+    <div class=”page-header“ style="color: white; height: 70px; padding-top: 10px;" >
+        <h1> <i class="fas fa-school"></i> <small>지역별</small> 초등학교 폐교 예측 </h1>
+        </div>  
+
     <div class="" row>
         <div class=".col-12 .col-sm-12 .col-md-12 .col-lg-12 .col-xl-12">
-            <div id="map" style="width:max-width;height:700px;"></div>
+            <div id="map" style="width:max-width;height:600px;"></div>
         </div>
     </div>
 </div>
@@ -48,12 +75,16 @@
 
 </script>
 
+<!-- 라디오 버튼 글씨크기 변경 -->
 <form id="mform">
-    <input name="option" type="radio" name="chk_info" value="기본 모드" checked="checked">기본 모드
-    <input name="option" type="radio" name="chk_info" value="폐교한 학교" >폐교한 학교
-    <input name="option" type="radio" name="chk_info" value="개교한 학교" >개교한 학교
-    <input name="option" type="radio" name="chk_info" value="비율 구하기" >비율 구하기
+    <div id='test' style="padding-top: 10px;">
+    <input class="va_m radio" name="option" type="radio" name="chk_info" value="기본 모드"><label style="font-size: 20px;"><strong>기본 모드</strong></label> 
+    <input class="va_m radio" name="option" type="radio" name="chk_info" value="폐교한 학교"><label style="font-size: 20px;"><strong>폐교한 학교</strong></label> 
+    <input class="va_m radio" name="option" type="radio" name="chk_info" value="개교한 학교" checked="checked"><label style="font-size: 20px;"><strong>개교한 학교</strong></label> 
+    <input class="va_m radio" name="option" type="radio" ncame="chk_info" value="비율 구하기"><label style="font-size: 20px;"><strong>비율 구하기</strong></label> 
+</div>
 </form>
+
 <script type="text/javascript">
     window.onload = function () {
         //1. radio 버튼 개별적으로 이벤트 체크
@@ -98,11 +129,12 @@
                     // console.log("QQQ")
                     // // clusterer.clear()
                     // var point_list = new Array();
-                    //
+                    //{#
                     // {% for loc in json_data[0]['geometry']['coordinates'][0] %}
                     //     point_list.push( new kakao.maps.LatLng({{loc[0]}}, {{loc[1]}}));
                     //     console.log(point_list[{{loop.index0}}])
                     // {% endfor %}
+                //#}
                     // //
                     // // 지도에 다각형을 표시한다
                     // var polygon = new kakao.maps.Polygon({
