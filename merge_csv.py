@@ -54,7 +54,35 @@ import pandas as pd
 # si['개교수'] = num_open
 #
 # si.to_csv("sido_school.csv", encoding="euc-kr", index=False)
+# import json
+# def sido_rate():
+#     sidoDict = {}
+#     sido = pd.read_csv("sido_school.csv", encoding="euc-kr")
+#     for i in range(len(sido)):
+#         tmp_sido = sido.loc[i]
+#         sidoDict[tmp_sido['시도']] = [tmp_sido.loc['총학교수'], tmp_sido.loc['개교수'], math.ceil(((1-(tmp_sido.loc['개교수']/tmp_sido.loc['총학교수']))*16))-1 ]
+#
+#     return sidoDict
+
 import json
-with open("save_sido.json", encoding="UTF-8") as f:
-    Loc = json.load(f)
-    print("H")
+sido = pd.read_csv("sido_school.csv", encoding="euc-kr")
+import math
+# with open("save_sido.json", encoding="UTF-8") as f:
+#     Loc = json.load(f)
+#     for idx, loc in enumerate(Loc['geometries']):
+#         tmp_sido = sido.loc[idx]
+#         loc['name'] = tmp_sido['시도']
+#         print(loc['name'],math.ceil(((1-(tmp_sido.loc['개교수']/tmp_sido.loc['총학교수']))*16))-1)
+#         loc['color'] = math.ceil(((1-(tmp_sido.loc['개교수']/tmp_sido.loc['총학교수']))*16))
+#
+#     print("HH")
+#     # with open("save_sido2.json",'w', encoding="UTF-8") as ff:
+#     #     json.dump(Loc, ff)
+#     # print("H")
+#
+# with open("save_sido2.json", encoding="UTF-8") as f:
+#     Loc = json.load(f)
+#     print("HHH")
+
+unique_location = pd.read_csv("final_school_data.csv", encoding="euc-kr").values.tolist()
+print(unique_location)
