@@ -11,23 +11,24 @@ from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 
-Jet_colormap = [[0, 0, 191],
-                [0, 0, 191]
-    , [0, 0, 255]
-    , [0, 63, 255]
-    , [0, 127, 255]
-    , [0, 191, 255]
-    , [0, 255, 255]
-    , [63, 255, 191]
-    , [127, 255, 127]
-    , [191, 255, 63]
-    , [255, 255, 0]
-    , [255, 191, 0]
-    , [255, 127, 0]
-    , [255, 63, 0]
-    , [255, 0, 0]
-    , [191, 0, 0]
-    , [127, 0, 0]]
+Jet_colormap = [
+    '#0000BF'
+    , '#0000FF'
+    , '#0040ff'
+    , '#0080ff'
+    , '#00bfff'
+    , '#00ffff'
+    , '#3fffbf'
+    , '#7fffbf'
+    , '#bfff3f'
+    , '#ffff00'
+    , '#ffbf00'
+    , '#ff7f00'
+    , '#ff4000'
+    , '#ff0000'
+    , '#bf0000'
+    , '#7f0000'
+    , '#000000']
 
 restapi = config('KAKAO_REEST_API')
 jsapi = config('KAKAO_JAVASCRIPT_API')
@@ -56,12 +57,23 @@ def predict(x, y):
     print(predictions)
     return predictions
 
+def sido_rate():
+    sidoDict = {}
+    sido = pd.read_csv("sido_school.csv", encoding="euc-kr")
+    for i in range(len(sido)):
+        tmp_sido = sido.loc[i]
+        sidoDict[tmp_sido['시도']] = [tmp_sido.loc['총학교수'], tmp_sido.loc['개교수']]
+    return sidoDict
+
+sido = sido_rate()
 
 @app.route('/')
 def hello():
     unique_location = pd.read_csv("unique_location.csv", encoding="UTF-8").values.tolist()
     # print(Loc["features"][0]["geometry"])
-    return render_template("index.html", app_key=jsapi, unique_location = unique_location, location_size = len(unique_location), colormaps = Jet_colormap, predict=predict, json_data = Loc["geometries"])
+    return render_template("index.html", app_key=jsapi, unique_location = unique_location, \
+                           location_size = len(unique_location), colormaps = Jet_colormap, predict=predict,\
+                           sido=sido, json_data = Loc["geometries"])
 
 @app.route('/predict',methods=["POST"])
 def predic():
