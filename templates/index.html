@@ -15,7 +15,6 @@
             crossorigin="anonymous"></script>
 
 <!-- 스타일 태그 추가 -->
-<style>
     body {
         background-color: black;
     }
@@ -94,7 +93,10 @@
 
     var polygonList = [];
     var polygonLength = 0;
+
+    var polygonPosList = [];
 </script>
+
 <script type="text/javascript">
     window.onload = function () {
         //1. radio 버튼 개별적으로 이벤트 체크
@@ -116,8 +118,9 @@
                     clusterer.clear();
                     clusterer.addMarkers(openSchool);
                 }
-                else if(this.value == "비율 구하기")
+                else if(this.value == "폐교 비율 구하기")
                 {
+                    var idx = 0;
                     {% for geo in json_data%}
                         {% if geo['type'] =='Polygon' %}
                             {% for i in geo['coordinates'] %}
@@ -128,7 +131,7 @@
                                  var polygon = new kakao.maps.Polygon({
                                     map : map, // 다각형을 표시할 지도 객체
                                     path : path,
-                                    fillColor: '#FF0000', // 채움 색
+                                    fillColor: '{{colormaps[geo['color']]}}', // 채움 색
                                     fillOpacity: 0.5, // 채움 불투명도
                                     strokeWeight: 3, // 선의 두께
                                     strokeColor: '#FF0000', // 선 색
@@ -136,6 +139,10 @@
                                     strokeStyle: 'solid' // 선 스타일
                                 });
 
+                                kakao.maps.event.addListener(polygon, 'click', function(mouseEvent) {
+                                        var latlng = mouseEvent.latLng;
+                                        console.log('{{geo['name']}}');
+                                });
                                 polygon.setMap(map); // 지도에 올린다.
                                 polygonList.push(polygon);
                             {% endfor %}
@@ -149,12 +156,17 @@
                                      var polygon = new kakao.maps.Polygon({
                                         map : map, // 다각형을 표시할 지도 객체
                                         path : path,
-                                        fillColor: '{{colormaps[idx]}}', // 채움 색
+                                        fillColor: '{{colormaps[geo['color']]}}', // 채움 색
                                         fillOpacity: 0.5, // 채움 불투명도
                                         strokeWeight: 3, // 선의 두께
                                         strokeColor: '#FF0000', // 선 색
                                         strokeOpacity: 0.9, // 선 투명도
                                         strokeStyle: 'solid' // 선 스타일
+                                    });
+
+                                    kakao.maps.event.addListener(polygon, 'click', function(mouseEvent) {
+                                        var latlng = mouseEvent.latLng;
+                                        console.log('{{geo['name']}}');
                                     });
                                     polygon.setMap(map); // 지도에 올린다.
                                     polygonList.push(polygon);
@@ -162,9 +174,11 @@
                                 {% endfor %}
                             {% endfor %}
                         {%endif%}
+                        idx = idx+1;
                     {%endfor%}
                 }
-                else if(this.value == "비율 지우기"){
+                else if(this.value == "폐교 비율 지우기"){
+                    console.log(polygonPosList);
                     for(var i=0; i<polygonList.length; i++ )
                     {
                         polygonList[i].setMap(null);
@@ -182,44 +196,45 @@
      //폐교 데이터와 개교 데이터 나누기
     //폐교한 학교 마커 넣기
     {% for loc in unique_location %}
-    {% if loc[0] == 1 %}
+
+        {% if loc[3] == 0 %}
+            var marker= new kakao.maps.Marker({
+                map: map,
+                opacity :0.5,
+                position: new kakao.maps.LatLng({{loc[4]}}, {{ loc[5]}})
+            });
+
+            // 마커에 클릭 이벤트를 등록한다 (우클릭 : rightclick)
+            kakao.maps.event.addListener(marker, 'click', function() {
+                if(infowindow != null){
+                    infowindow.close();
+                }
+                infowindow = new kakao.maps.InfoWindow({
+                    map: map,
+                    position: new kakao.maps.LatLng({{loc[4]}}, {{ loc[5]}}),
+                    content: '{{loc[2]}}'
+                });
+            });
+            closeSchool.push(marker)
+        {% elif loc[3] == 1%}
         var marker= new kakao.maps.Marker({
-            map: map,
-            opacity :0.5,
-            position: new kakao.maps.LatLng({{loc[1]}}, {{ loc[2]}})
-        });
-
-        // 마커에 클릭 이벤트를 등록한다 (우클릭 : rightclick)
-        kakao.maps.event.addListener(marker, 'click', function() {
-            if(infowindow != null){
-                infowindow.close();
-            }
-            infowindow = new kakao.maps.InfoWindow({
                 map: map,
-                position: new kakao.maps.LatLng({{loc[1]}}, {{ loc[2]}}),
-                content: '학교{{loop.index0}}'
+                position: new kakao.maps.LatLng({{loc[4]}}, {{ loc[5]}})
             });
-        });
-        closeSchool.push(marker)
-    {% elif loc[0] == 0%}
-    var marker= new kakao.maps.Marker({
-            map: map,
-            position: new kakao.maps.LatLng({{loc[1]}}, {{ loc[2]}})
-        });
 
-        // 마커에 클릭 이벤트를 등록한다 (우클릭 : rightclick)
-        kakao.maps.event.addListener(marker, 'click', function() {
-            if(infowindow != null){
-                infowindow.close();
-            }
-            infowindow = new kakao.maps.InfoWindow({
-                map: map,
-                position: new kakao.maps.LatLng({{loc[1]}}, {{ loc[2]}}),
-                content: '학교{{loop.index0}}'
+            // 마커에 클릭 이벤트를 등록한다 (우클릭 : rightclick)
+            kakao.maps.event.addListener(marker, 'click', function() {
+                if(infowindow != null){
+                    infowindow.close();
+                }
+                infowindow = new kakao.maps.InfoWindow({
+                    map: map,
+                    position: new kakao.maps.LatLng({{loc[4]}}, {{ loc[5]}}),
+                    content: '{{loc[2]}}'
+                });
             });
-        });
-        openSchool.push(marker)
-    {% endif %}
+            openSchool.push(marker)
+        {% endif %}
     {%endfor%}
      clusterer.clear();
      clusterer.redraw();
@@ -248,7 +263,6 @@
 
      function test1(latlng) {
          result_value = false;
-        console.log("dddd")
           $.ajax({
             type : 'POST',
             url : '/predict',
@@ -259,9 +273,7 @@
               async: false,
             dataType : 'json',
             success : function(result){
-                    console.log("ajax 안 result: ", result)
                     result_value = result.qq;
-                    console.log(result.qq);
 
             },
             error : function(xtr,status,error){
@@ -269,9 +281,34 @@
             }});
         return result_value;
      }
+        var customOverlay = new kakao.maps.CustomOverlay({
+        map: map,
+        content: '<img src="./static/images/rate_image.png" width="100px" height="=150px">',
+        position: new kakao.maps.LatLng(37.56682, 126.97865), // 커스텀 오버레이를 표시할 좌표
+        xAnchor: -1.0, // 컨텐츠의 x 위치
+        yAnchor: 7.0 // 컨텐츠의 y 위치
+    });
+     SimpleTextMarker.prototype.draw = function() {
+            var projection = this.getProjection();
+            var point = projection.pointFromCoords(this.position);
+            var width = this.node.offsetWidth;
+            var height = this.node.offsetHeight;
 
+            this.node.style.left = (point.x - width/2) + "px";
+            this.node.style.top = (point.y - height/2) + "px";
+
+        };
+     customOverlay.setMap(map);
+
+     kakao.maps.event.addListener(map, 'dragend', function() {
+        // 지도 중심좌표를 얻어옵니다
+        var latlng = map.getCenter();
+
+        var message = '변경된 지도 중심좌표는 ' + latlng.getLat() + ' 이고, ';
+        message += '경도는 ' + latlng.getLng() + ' 입니다';
+
+    });
 </script>
-
 
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
         integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
