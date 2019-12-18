@@ -13,33 +13,33 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
             integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
             crossorigin="anonymous"></script>
+    <style>
+    <!-- 스타일 태그 추가 -->
+        body {
+            background-color: black;
+        }
+        header {
+            height: 80px;
+        }
+        header > h1{
+            color: #c4c4c4;
+            margin-top: 20px;
+            text-align: center;
+        }
 
-<!-- 스타일 태그 추가 -->
-    body {
-        background-color: black;
-    }
-    header {
-        height: 80px;
-    }
-    header > h1{
-        color: #c4c4c4;  
-        margin-top: 20px;
-        text-align: center;
-    }
+        #mform {
+            text-align: center;
+            color: white;
+        }
 
-    #mform {
-        text-align: center;
-        color: white;
-    }
-
-    #mform > input {
-        display: inline-block;
-        margin: 10px;
-     }
+        #mform > input {
+            display: inline-block;
+            margin: 10px;
+         }
 
     </style>
 </head>
-<body>
+<body style="background-color: black">
 <script type='text/javascript'>
     //<![CDATA[
     // 사용할 앱의 JavaScript 키를 설정해 주세요.
@@ -57,8 +57,8 @@
     <input class="va_m radio" name="option" type="radio" name="chk_info" value="기본 모드" checked="checked"><label style="font-size: 20px;"><strong>기본 모드</strong></label>
     <input class="va_m radio" name="option" type="radio" name="chk_info" value="폐교한 학교"><label style="font-size: 20px;"><strong>폐교한 학교</strong></label> 
     <input class="va_m radio" name="option" type="radio" name="chk_info" value="개교한 학교"><label style="font-size: 20px;"><strong>개교한 학교</strong></label>
-    <input class="va_m radio" name="option" type="radio" ncame="chk_info" value="비율 구하기"><label style="font-size: 20px;"><strong>비율 구하기</strong></label> 
-    <input class="va_m radio" name="option" type="radio" ncame="chk_info" value="비율 지우기"><label style="font-size: 20px;"><strong>비율 지우기</strong></label>
+    <input class="va_m radio" name="option" type="radio" ncame="chk_info" value="폐교 비율 보기"><label style="font-size: 20px;"><strong>폐교 비율 보기</strong></label>
+    <input class="va_m radio" name="option" type="radio" ncame="chk_info" value="폐교 비율 숨기기"><label style="font-size: 20px;"><strong>폐교 비율 숨기기</strong></label>
 </form>
 
     <div class="map" row>
@@ -118,7 +118,7 @@
                     clusterer.clear();
                     clusterer.addMarkers(openSchool);
                 }
-                else if(this.value == "폐교 비율 구하기")
+                else if(this.value == "폐교 비율 보기")
                 {
                     var idx = 0;
                     {% for geo in json_data%}
@@ -177,7 +177,7 @@
                         idx = idx+1;
                     {%endfor%}
                 }
-                else if(this.value == "폐교 비율 지우기"){
+                else if(this.value == "폐교 비율 숨기기"){
                     console.log(polygonPosList);
                     for(var i=0; i<polygonList.length; i++ )
                     {
@@ -284,30 +284,25 @@
         var customOverlay = new kakao.maps.CustomOverlay({
         map: map,
         content: '<img src="./static/images/rate_image.png" width="100px" height="=150px">',
-        position: new kakao.maps.LatLng(37.56682, 126.97865), // 커스텀 오버레이를 표시할 좌표
-        xAnchor: -1.0, // 컨텐츠의 x 위치
-        yAnchor: 7.0 // 컨텐츠의 y 위치
+        position: map.getCenter(), // 커스텀 오버레이를 표시할 좌표
+        xAnchor: -3.7, // 컨텐츠의 x 위치
+        yAnchor: 10 // 컨텐츠의 y 위치
     });
-     SimpleTextMarker.prototype.draw = function() {
-            var projection = this.getProjection();
-            var point = projection.pointFromCoords(this.position);
-            var width = this.node.offsetWidth;
-            var height = this.node.offsetHeight;
-
-            this.node.style.left = (point.x - width/2) + "px";
-            this.node.style.top = (point.y - height/2) + "px";
-
-        };
      customOverlay.setMap(map);
 
-     kakao.maps.event.addListener(map, 'dragend', function() {
-        // 지도 중심좌표를 얻어옵니다
+     kakao.maps.event.addListener(map, 'center_changed', function() {
         var latlng = map.getCenter();
-
-        var message = '변경된 지도 중심좌표는 ' + latlng.getLat() + ' 이고, ';
-        message += '경도는 ' + latlng.getLng() + ' 입니다';
-
+        var pos = new kakao.maps.LatLng(latlng.getLat()+7, latlng.getLng()+10);
+        customOverlay.setPosition(latlng)
     });
+    //  kakao.maps.event.addListener(map, 'dragend', function() {
+    //     // 지도 중심좌표를 얻어옵니다
+    //     var latlng = map.getCenter();
+    //     customOverlay.setPosition(latlng)
+    //     var message = '변경된 지도 중심좌표는 ' + latlng.getLat() + ' 이고, ';
+    //     message += '경도는 ' + latlng.getLng() + ' 입니다';
+    //      console.log(message)
+    // });
 </script>
 
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
