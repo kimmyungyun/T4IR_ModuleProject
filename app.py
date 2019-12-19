@@ -10,6 +10,7 @@ from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 
+# 폐교 밀도 color value -- 김명윤
 Jet_colormap = [
     '#0000BF'
     , '#0000FF'
@@ -29,16 +30,21 @@ Jet_colormap = [
     , '#7f0000'
     , '#000000']
 
+#.env 파일에 적혀있는 키값 가져오기 -- 김명윤
 restapi = config('KAKAO_REEST_API')
 jsapi = config('KAKAO_JAVASCRIPT_API')
+
+#각 시도 별 구역 위도,경도 -- 김명윤
 with open("save_sido2.json", encoding="UTF-8") as f:
     Loc = json.load(f)
 
+# 학습된 모델 데이터 -- 김명윤
 with open("pca.pkl", 'rb') as rf:
     model = pickle.load(rf)
 
 app = Flask(__name__)
 
+# 학습된 모델 로딩 -- 김명윤
 def init_pca():
     pipe = model['pipe']
     pipe.fit(model['X_train'], model['Y_train'])
@@ -46,6 +52,7 @@ def init_pca():
 
 pipe = init_pca()
 
+# 위도 경도를 사용해 모델 적용 -- 김명윤
 def predict(x, y):
     x = float(x)
     y = float(y)
@@ -59,12 +66,14 @@ def predict(x, y):
 
 @app.route('/')
 def hello():
+    # 폐교, 개교 되어있는 학교 데이터 로딩 -- 김명윤
     unique_location = pd.read_csv("final_school_data.csv", encoding="euc-kr").values.tolist()
-    # print(Loc["features"][0]["geometry"])
+
     return render_template("index.html", app_key=jsapi, unique_location = unique_location, \
                            location_size = len(unique_location), colormaps = Jet_colormap, predict=predict,\
                             json_data = Loc["geometries"])
 
+# 카카오맵에 입력한 좌표를 전달받아 예측된 값을 전달 -- 김명윤
 @app.route('/predict',methods=["POST"])
 def predic():
     pos = request.form.get('lat')
