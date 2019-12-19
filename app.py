@@ -3,6 +3,13 @@ from decouple import config
 import json
 import pandas as pd
 import numpy as np
+import cx_Oracle
+import os
+import pymongo 
+from pymongo import MongoClient
+from io import BytesIO
+from gridfs import GridFS
+from bson import objectid
 
 import pickle
 import math
@@ -34,14 +41,25 @@ Jet_colormap = [
 restapi = config('KAKAO_REEST_API')
 jsapi = config('KAKAO_JAVASCRIPT_API')
 
-#각 시도 별 구역 위도,경도 -- 김명윤
-with open("save_sido2.json", encoding="UTF-8") as f:
-    Loc = json.load(f)
+# #몽고디비 연결 -- 김우희 
+conn = pymongo.MongoClient().python_test
+fs = GridFS(conn)
 
-# 학습된 모델 데이터 -- 김명윤
-with open("pca.pkl", 'rb') as rf:
-    model = pickle.load(rf)
+#각 시도 별 구역 위도,경도 몽고 DB연결-- 김우희
+def load_sido_json():
+    f = fs.get_last_version(filename = "save_sido2.json")
+    model = json.load(BytesIO(f.read()))
+    return  model
 
+# 학습된 모델 데이터 몽고DB 연결-- 김우희
+def load_pcamodel():
+    f = fs.get_last_version(filename = "pca.pkl")
+    data = f.read()
+    model = pickle.load(BytesIO(data))
+    # model = pickle.load(rf)
+    return model
+model = load_pcamodel()
+Loc = load_sido_json()
 app = Flask(__name__)
 
 # 학습된 모델 로딩 -- 김명윤
@@ -49,6 +67,12 @@ def init_pca():
     pipe = model['pipe']
     pipe.fit(model['X_train'], model['Y_train'])
     return pipe
+
+    # 오라클 데이터 베이스 연동 -- 김우희
+def read_Schoollocation():
+    connection = cx_Oracle.connect('HR','1234','localhost/xe')
+    cursor = connection.cursor()
+    return pd.read_sql("select * from FINAL_SCHOOL_DATA",connection).values.tolist()
 
 pipe = init_pca()
 
@@ -66,8 +90,7 @@ def predict(x, y):
 
 @app.route('/')
 def hello():
-    # 폐교, 개교 되어있는 학교 데이터 로딩 -- 김명윤
-    unique_location = pd.read_csv("final_school_data.csv", encoding="euc-kr").values.tolist()
+    unique_location=read_Schoollocation()
 
     return render_template("index.html", app_key=jsapi, unique_location = unique_location, \
                            location_size = len(unique_location), colormaps = Jet_colormap, predict=predict,\
@@ -88,4 +111,4 @@ def predic():
     return json.dumps(result)
 
 if __name__=='__main__':
-    app.run(debug=True, port=8080)
+    app.run(debug=True, port=5000)
