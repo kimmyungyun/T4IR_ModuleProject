@@ -1,21 +1,15 @@
-from flask import Flask, escape, request, render_template
+from flask import Flask, request, render_template
 from decouple import config
 import json
 import pandas as pd
 import numpy as np
 import cx_Oracle
-import os
-import pymongo 
-from pymongo import MongoClient
+import pymongo
 from io import BytesIO
 from gridfs import GridFS
-from bson import objectid
 
 import pickle
-import math
-from sklearn.decomposition import PCA
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
+
 
 # 폐교 밀도 color value -- 김명윤
 Jet_colormap = [
@@ -38,7 +32,6 @@ Jet_colormap = [
     , '#000000']
 
 #.env 파일에 적혀있는 키값 가져오기 -- 김명윤
-restapi = config('KAKAO_REEST_API')
 jsapi = config('KAKAO_JAVASCRIPT_API')
 
 # #몽고디비 연결 -- 김우희 

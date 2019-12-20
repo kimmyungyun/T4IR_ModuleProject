@@ -3,6 +3,7 @@
 # Edit at https://www.gitignore.io/?templates=python,pycharm,windows,visualstudiocode
 
 *.geojson
+*.pdf
 
 ### PyCharm ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
